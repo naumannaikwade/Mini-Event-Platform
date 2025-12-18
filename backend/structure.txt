@@ -1,0 +1,33 @@
+frontend/
+├── public/
+├── src/
+│   ├── components/
+│   │   ├── auth/
+│   │   │   ├── Login.js
+│   │   │   └── Register.js
+│   │   ├── events/
+│   │   │   ├── EventList.js
+│   │   │   ├── EventCard.js
+│   │   │   ├── EventForm.js
+│   │   │   └── EventDetail.js
+│   │   ├── layout/
+│   │   │   ├── Navbar.js
+│   │   │   ├── Footer.js
+│   │   │   └── Layout.js
+│   │   └── shared/
+│   │       ├── Button.js
+│   │       └── Loader.js
+│   ├── pages/
+│   │   ├── Home.js
+│   │   ├── Dashboard.js
+│   │   └── Profile.js
+│   ├── context/
+│   │   └── AuthContext.js
+│   ├── services/
+│   │   └── api.js
+│   ├── utils/
+│   │   └── constants.js
+│   ├── App.js
+│   ├── App.css
+│   └── index.js
+└── package.json
