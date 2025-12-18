@@ -17,7 +17,7 @@ connectDB();
 
 // CORS configuration for production
 const corsOptions = {
-  origin: '*',
+  origin: 'https://minieventplatformbynauman.vercel.app/',
   credentials: true,
   optionsSuccessStatus: 200
 };
