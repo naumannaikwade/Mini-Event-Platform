@@ -45,8 +45,8 @@ const EventForm = ({ edit = false }) => {
         image: null
       });
       
-      if (event.image !== 'no-image.jpg') {
-        setImagePreview(`http://localhost:5000/uploads/${event.image}`);
+      if (event.image && event.image.url && event.image.url !== "no-image.jpg") {
+      setImagePreview(event.image.url);
       }
     } catch (err) {
       console.error('Error fetching event:', err);
