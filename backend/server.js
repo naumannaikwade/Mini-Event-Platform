@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 // Route imports
 const authRoutes = require('./routes/auth.routes');
 const eventRoutes = require('./routes/event.routes');
+const rsvpRoutes = require('./routes/rsvp.routes');
 
 // Initialize app
 const app = express();
@@ -37,6 +38,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api', rsvpRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
