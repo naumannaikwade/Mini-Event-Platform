@@ -22,6 +22,18 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Handle response errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Auth API calls
 export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),
@@ -33,8 +45,23 @@ export const authAPI = {
 export const eventsAPI = {
   getAllEvents: () => api.get('/events'),
   getEvent: (id) => api.get(`/events/${id}`),
-  createEvent: (eventData) => api.post('/events', eventData),
-  updateEvent: (id, eventData) => api.put(`/events/${id}`, eventData),
+  createEvent: (eventData) => {
+    // Handle FormData for file uploads
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.post('/events', eventData, config);
+  },
+  updateEvent: (id, eventData) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.put(`/events/${id}`, eventData, config);
+  },
   deleteEvent: (id) => api.delete(`/events/${id}`),
 };
 
