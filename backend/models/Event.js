@@ -30,8 +30,14 @@ const eventSchema = new mongoose.Schema({
     default: 0
   },
   image: {
-    type: String,
-    default: 'no-image.jpg'
+    url: {
+      type: String,
+      default: 'https://res.cloudinary.com/dycctxdij/image/upload/v1700000000/default-event.jpg'
+    },
+    public_id: {
+      type: String,
+      default: null
+    }
   },
   creator: {
     type: mongoose.Schema.Types.ObjectId,
@@ -48,13 +54,5 @@ const eventSchema = new mongoose.Schema({
     default: Date.now
   }
 });
-
-// REMOVE or FIX the pre-save middleware - it's causing the error
-// eventSchema.pre('save', function(next) {
-//   if (this.currentAttendees > this.capacity) {
-//     next(new Error('Current attendees cannot exceed capacity'));
-//   }
-//   next();
-// });
 
 module.exports = mongoose.model('Event', eventSchema);

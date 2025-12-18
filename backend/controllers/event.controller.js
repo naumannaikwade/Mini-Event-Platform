@@ -1,16 +1,5 @@
 const Event = require('../models/Event');
-const path = require('path');
-const fs = require('fs');
-
-// Helper to delete image file
-const deleteImage = (imageName) => {
-  if (imageName !== 'no-image.jpg') {
-    const imagePath = path.join(__dirname, '../public/uploads', imageName);
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
-    }
-  }
-};
+const { deleteFromCloudinary } = require('../utils/cloudinaryUpload');
 
 // @desc    Get all events
 // @route   GET /api/events
@@ -19,7 +8,7 @@ const getEvents = async (req, res) => {
   try {
     const events = await Event.find()
       .populate('creator', 'name email')
-      .sort({ date: 1 }); // Sort by date ascending
+      .sort({ date: 1 });
     
     res.json({
       success: true,
@@ -72,11 +61,18 @@ const createEvent = async (req, res) => {
     req.body.creator = req.user.id;
     
     // Handle image upload
-    let image = 'no-image.jpg';
-    if (req.file) {
-      image = req.file.filename;
+    let imageData = {
+      url: 'https://res.cloudinary.com/dycctxdij/image/upload/v1700000000/default-event.jpg',
+      public_id: null
+    };
+    
+    if (req.file && req.file.path) {
+      imageData = {
+        url: req.file.path,
+        public_id: req.file.filename
+      };
     }
-    req.body.image = image;
+    req.body.image = imageData;
     
     const event = await Event.create(req.body);
     
@@ -85,11 +81,20 @@ const createEvent = async (req, res) => {
       data: event
     });
   } catch (error) {
-    console.error(error);
+    console.error('Create event error:', error);
     
-    // Delete uploaded image if event creation failed
-    if (req.file) {
-      deleteImage(req.file.filename);
+    // If event creation fails, delete uploaded image
+    if (req.file && req.file.filename) {
+      await deleteFromCloudinary(req.file.filename);
+    }
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(', ')
+      });
     }
     
     res.status(500).json({ 
@@ -122,12 +127,16 @@ const updateEvent = async (req, res) => {
     }
     
     // Handle image update
-    if (req.file) {
-      // Delete old image if it's not the default
-      if (event.image !== 'no-image.jpg') {
-        deleteImage(event.image);
+    if (req.file && req.file.path) {
+      // Delete old image from Cloudinary if it exists
+      if (event.image.public_id) {
+        await deleteFromCloudinary(event.image.public_id);
       }
-      req.body.image = req.file.filename;
+      
+      req.body.image = {
+        url: req.file.path,
+        public_id: req.file.filename
+      };
     }
     
     event = await Event.findByIdAndUpdate(req.params.id, req.body, {
@@ -140,11 +149,11 @@ const updateEvent = async (req, res) => {
       data: event
     });
   } catch (error) {
-    console.error(error);
+    console.error('Update event error:', error);
     
-    // Delete new image if update failed
-    if (req.file) {
-      deleteImage(req.file.filename);
+    // If update fails, delete new uploaded image
+    if (req.file && req.file.filename) {
+      await deleteFromCloudinary(req.file.filename);
     }
     
     res.status(500).json({ 
@@ -176,9 +185,9 @@ const deleteEvent = async (req, res) => {
       });
     }
     
-    // Delete image if it's not the default
-    if (event.image !== 'no-image.jpg') {
-      deleteImage(event.image);
+    // Delete image from Cloudinary if it exists
+    if (event.image.public_id) {
+      await deleteFromCloudinary(event.image.public_id);
     }
     
     await event.deleteOne();
