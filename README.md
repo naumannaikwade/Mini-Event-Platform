@@ -6,7 +6,6 @@ A full-featured event management platform built with the MERN stack (MongoDB, Ex
 
 - **Frontend**: [https://minieventplatformbynauman.vercel.app/](https://minieventplatformbynauman.vercel.app/)
 - **Backend API**: [https://minieventplatformbynauman.onrender.com](https://minieventplatformbynauman.onrender.com)
-- **Health Check**: [https://minieventplatformbynauman.onrender.com/health](https://minieventplatformbynauman.onrender.com)
 - **GitHub Repository**: [https://github.com/naumannaikwade/Mini-Event-Platform](https://github.com/naumannaikwade/Mini-Event-Platform)
 
 ## 📋 Features
