@@ -15,9 +15,17 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
+// CORS configuration for production
+const corsOptions = {
+  origin: '*',
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Make uploads folder static
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
@@ -30,24 +38,33 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // Log all requests (remove or comment out in production)
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  next();
-});
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`);
+    next();
+  });
+}
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api', rsvpRoutes);
 
+// Health check route for Render
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
 // Basic route
 app.get('/', (req, res) => {
   res.json({ 
     message: 'Event Platform API',
     version: '1.0.0',
+    environment: process.env.NODE_ENV,
     endpoints: {
       auth: '/api/auth',
-      events: '/api/events'
+      events: '/api/events',
+      health: '/health'
     }
   });
 });
@@ -56,11 +73,20 @@ app.get('/', (req, res) => {
 const errorHandler = require('./middleware/error.middleware');
 app.use(errorHandler);
 
+// Handle 404 routes - Use a regex pattern or function for 404
+app.use((req, res, next) => {
+  res.status(404).json({ 
+    success: false,
+    error: 'Route not found',
+    path: req.originalUrl,
+    method: req.method 
+  });
+});
+
 // Define PORT
 const PORT = process.env.PORT || 5000;
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Uploads directory: ${uploadsDir}`);
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
